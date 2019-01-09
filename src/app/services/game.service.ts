@@ -8,17 +8,28 @@ import { Injectable, Input } from "@angular/core";
 import * as CONFIG from "./../config/config";
 import { Obstacles } from "./../interfaces/obstacles";
 import { SingleObstacles } from "./../interfaces/single-obstacle";
+import { PlayerPosition } from "./../interfaces/player-position";
 
 @Injectable()
 export class GameService {
   @Input() public width: number = CONFIG.playGroundWidth;
   @Input() public height: number = CONFIG.playGroundHeight;
   frameNumber: number = CONFIG.frameNumber;
+  player: PlayerPosition = {
+    x: CONFIG.playGroundWidth / 2 - CONFIG.playerCar.width,
+    y:
+      CONFIG.playGroundHeight -
+      (CONFIG.playerCar.height + CONFIG.playerCar.height / 2)
+  };
 
   context: CanvasRenderingContext2D;
   obstacles: Array<Obstacles> = [];
   image: HTMLImageElement = null;
   gameLoop = null;
+  moveUP = false;
+  moveDown = false;
+  moveLeft = false;
+  moveRight = false;
 
   loadAssets(canvasElement: HTMLCanvasElement): Promise<void> {
     this.context = canvasElement.getContext("2d");
@@ -29,7 +40,9 @@ export class GameService {
       this.image.src = CONFIG.spritePath;
       this.image.width = 58;
       this.image.height = 128;
-      resolve();
+      this.image.onload = () => {
+        resolve();
+      };
     });
   }
 
@@ -39,6 +52,7 @@ export class GameService {
       this.cleanGround();
       this.createObstacles();
       this.moveObstacles();
+      this.createPlayer();
     }, 10);
   }
 
@@ -100,5 +114,83 @@ export class GameService {
         this.obstacles.splice(index, 1);
       }
     });
+  }
+
+  createPlayer(): void {
+    if (this.moveUP) {
+      if (this.player.y === 0) {
+        this.player.y = 0;
+      } else {
+        this.player.y -= CONFIG.playerCarSpeed;
+      }
+    } else if (this.moveDown) {
+      if (
+        this.player.y + CONFIG.playerCar.height === CONFIG.playGroundHeight ||
+        this.player.y + CONFIG.playerCar.height > CONFIG.playGroundHeight
+      ) {
+        this.player.y = CONFIG.playGroundHeight - CONFIG.playerCar.height;
+      } else {
+        this.player.y += CONFIG.playerCarSpeed;
+      }
+    } else if (this.moveLeft) {
+      if (this.player.x === 0 || this.player.x < 0) {
+        this.player.x = 0;
+      } else {
+        this.player.x -= CONFIG.playerCarSpeed;
+      }
+    } else if (this.moveRight) {
+      if (
+        this.player.x + CONFIG.playerCar.sWidth === CONFIG.playGroundWidth ||
+        this.player.x + CONFIG.playerCar.sWidth > CONFIG.playGroundWidth
+      ) {
+        this.player.x = CONFIG.playGroundWidth - CONFIG.playerCar.width;
+      } else {
+        this.player.x += CONFIG.playerCarSpeed;
+      }
+    }
+    this.context.drawImage(
+      this.image,
+      CONFIG.playerCar.sX,
+      CONFIG.playerCar.sY,
+      CONFIG.playerCar.sWidth,
+      CONFIG.playerCar.sHeight,
+      this.player.x,
+      this.player.y,
+      CONFIG.playerCar.width,
+      CONFIG.playerCar.height
+    );
+  }
+
+  detectCrash(obstacle: Obstacles): void {
+    const componentLeftSide = obstacle.x;
+    const componentRightSide = obstacle.x + obstacle.width;
+    const componentTop = obstacle.y;
+    const componentBottom = obstacle.y + obstacle.height;
+
+    const carRightSide = this.player.x + CONFIG.playerCar.width;
+    const carLeftSide = this.player.x;
+    const carTop = this.player.y;
+    const carBottom = this.player.y + CONFIG.playerCar.height;
+
+    if (
+      carRightSide > componentLeftSide &&
+      carTop < componentBottom &&
+      (carLeftSide < componentRightSide && carTop < componentBottom) &&
+      (carRightSide > componentLeftSide && carBottom > componentTop) &&
+      (carLeftSide < componentRightSide && carBottom > componentTop)
+    ) {
+      clearInterval(this.gameLoop);
+      alert("Game Over");
+      window.location.reload();
+    }
+  }
+
+  cleanGround(): void {
+    this.context.clearRect(
+      0,
+      0,
+      CONFIG.playGroundWidth,
+      CONFIG.playGroundHeight
+    );
   }
 }
