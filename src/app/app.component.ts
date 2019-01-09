@@ -9,7 +9,7 @@ import {
   AfterViewInit,
   ViewChild,
   HostListener
-} from "@angular/core";
+} from '@angular/core';
 import { AppService } from './services/app.service';
 import { GameService } from './services/game.service';
 

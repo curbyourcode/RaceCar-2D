@@ -3,12 +3,12 @@
     @auther Rouz Majlessi
 */
 
-import { Injectable, Input } from "@angular/core";
+import { Injectable, Input } from '@angular/core';
 
-import * as CONFIG from "./../config/config";
-import { Obstacles } from "./../interfaces/obstacles";
-import { SingleObstacles } from "./../interfaces/single-obstacle";
-import { PlayerPosition } from "./../interfaces/player-position";
+import * as CONFIG from './../config/config';
+import { Obstacles } from './../interfaces/obstacles';
+import { SingleObstacles } from './../interfaces/single-obstacle';
+import { PlayerPosition } from './../interfaces/player-position';
 
 @Injectable()
 export class GameService {
@@ -32,7 +32,7 @@ export class GameService {
   moveRight = false;
 
   loadAssets(canvasElement: HTMLCanvasElement): Promise<void> {
-    this.context = canvasElement.getContext("2d");
+    this.context = canvasElement.getContext('2d');
     canvasElement.width = this.width;
     canvasElement.height = this.height;
     return new Promise((resolve, reject) => {
@@ -180,7 +180,7 @@ export class GameService {
       (carLeftSide < componentRightSide && carBottom > componentTop)
     ) {
       clearInterval(this.gameLoop);
-      alert("Game Over");
+      alert('Game Over');
       window.location.reload();
     }
   }
