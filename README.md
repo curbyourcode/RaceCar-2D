@@ -8,11 +8,9 @@ A 2D car game with Angular. You start with a car and have to get to the end of t
 4. Demo: [https://racecar-ba079.firebaseapp.com]
 
 ## Technologies Used
-Angular cli 7,
+Angular cli 7
 
-
-Sprites,
-
+Sprites
 
 Firebase
 
